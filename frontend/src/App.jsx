@@ -1,38 +1,18 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react'; // Import useCallback
 
-// Main App component for the 20-20-20 Rule Timer
 export default function App() {
-  // State for customization settings, initialized to 20-20-20 rule defaults
-  const [workMinutes, setWorkMinutes] = useState(20); // Corresponds to intervalMinutes
-  const [breakSeconds, setBreakSeconds] = useState(20); // Corresponds to breakDurationSeconds
-  // longBreakMinutes state removed as per request
+  const [workMinutes, setWorkMinutes] = useState(localStorage.getItem("workminutes") === "NaN" ? 20 : localStorage.getItem("workminutes") < 0 ? 20 : localStorage.getItem("workminutes")); // Corresponds to intervalMinutes
+  const [breakSeconds, setBreakSeconds] = useState(localStorage.getItem("breakeseconds") === "NaN" ? 20 : localStorage.getItem("breakeseconds") < 0 ? 20 : localStorage.getItem("breakeseconds")); // Corresponds to breakDurationSeconds
   const [distanceFeet, setDistanceFeet] = useState(20); // For the 20-20-20 rule break message
-
-  // State for alert type ('sound', 'visual')
-  const [alertType, setAlertType] = useState('sound');
-
-  // State for active timer tab ('work', 'break')
+  const [alertType, setAlertType] = useState('sound'); // State for alert type ('sound', 'visual')
   const [activeTab, setActiveTab] = useState('work');
-
-  // State for timer control
   const [timerRunning, setTimerRunning] = useState(false);
   const [timeLeft, setTimeLeft] = useState(workMinutes * 60); // Time left for current active tab
-
-  // State for timer mode ('manual' or 'automate')
-  const [timerMode, setTimerMode] = useState('manual');
-
-  // States for session counts
+  const [timerMode, setTimerMode] = useState(localStorage.getItem("timermode")); // State for timer mode ('manual' or 'automate')
   const [workCount, setWorkCount] = useState(0);
   const [breakCount, setBreakCount] = useState(0);
-
-  // Ref to store the interval ID to clear it later
   const intervalRef = useRef(null);
-
-  // Audio object for sound alerts
-  // Using a placeholder URL for the sound, as per instructions, avoid external sound URLs
   const breakSoundRef = useRef(new Audio('https://www.soundjay.com/buttons/beep-07a.mp3'));
-
-  // State for controlling the visibility of the settings modal
   const [showSettingsModal, setShowSettingsModal] = useState(false);
 
   // Effect hook to update timeLeft when activeTab or customization settings change
@@ -46,7 +26,19 @@ export default function App() {
     setTimeLeft(newTime);
     setTimerRunning(false); // Stop timer when tab changes
     clearInterval(intervalRef.current); // Clear any running interval
-  }, [activeTab, workMinutes, breakSeconds]); // longBreakMinutes removed from dependencies
+  }, [activeTab, workMinutes, breakSeconds]);
+
+  // Memoize triggerAlert using useCallback
+  const triggerAlert = useCallback(() => {
+    if (alertType === 'sound') {
+      breakSoundRef.current.play().catch(e => console.error("Error playing sound:", e));
+    }
+  }, [alertType]);
+
+  useEffect(() => {
+      document.title = `${formatTime(timeLeft)} - ${activeTab === 'work' ? 'Work' : 'Break'} time`;
+  }, [timeLeft, timerRunning, activeTab]);
+
 
   // Effect hook for the main timer countdown
   useEffect(() => {
@@ -61,23 +53,22 @@ export default function App() {
           clearInterval(intervalRef.current);
           triggerAlert();
 
-          if (timerMode === 'automate') {
-            if (activeTab === 'work') {
-              setActiveTab('break');
-              setWorkCount((prevCount) => prevCount + 1); // Increment work count when work session ends
-            } else { // activeTab === 'break'
-              setActiveTab('work');
-              setBreakCount((prevCount) => prevCount + 1); // Increment break count when break session ends
-            }
-            setTimerRunning(true); // Auto-start the next phase
-          } else { // Manual mode
-            setTimerRunning(false); // Timer stops, user manually switches
-            if (activeTab === 'work') {
-                setWorkCount((prevCount) => prevCount + 1); // Increment work count even in manual mode
-            } else {
-                setBreakCount((prevCount) => prevCount + 1); // Increment break count even in manual mode
-            }
+          // Only increment counts once here — BEFORE changing tab
+          if (activeTab === 'work') {
+            setWorkCount((prev) => prev + 1);
+          } else {
+            setBreakCount((prev) => prev + 1);
           }
+
+          if (timerMode === 'automate') {
+            setActiveTab(activeTab === 'work' ? 'break' : 'work');
+            // Let useEffect reset timeLeft
+            setTimerRunning(true);
+          } else {
+            setTimerRunning(false);
+            setActiveTab(activeTab === 'work' ? 'break' : 'work');
+          }
+
           return 0;
         }
         return prevTime - 1;
@@ -85,15 +76,7 @@ export default function App() {
     }, 1000);
 
     return () => clearInterval(intervalRef.current);
-  }, [timerRunning, activeTab, workMinutes, breakSeconds, timerMode]); // Dependencies
-
-  // Function to trigger the selected alert type
-  const triggerAlert = () => {
-    if (alertType === 'sound') {
-      breakSoundRef.current.play().catch(e => console.error("Error playing sound:", e));
-    }
-    // Visual alert is handled by the UI changing based on activeTab and timer state
-  };
+  }, [timerRunning, workMinutes, breakSeconds, timerMode]); // Explicitly convert activeTab to String here
 
   // Function to format time for display (MM:SS)
   const formatTime = (totalSeconds) => {
@@ -121,28 +104,25 @@ export default function App() {
     setWorkCount(0); // Reset counts on manual reset
     setBreakCount(0); // Reset counts on manual reset
   };
-
+  
   return (
     <div className={`app-container ${activeTab === 'work' ? 'bg-red' : 'bg-teal'}`}>
 
       {/* Header */}
       <header className="app-header">
         <div className="app-logo">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" style={{ verticalAlign: 'middle', marginRight: '10px' }}>
+            <circle cx="12" cy="12" r="10" fill="white" stroke="currentColor" strokeWidth="2" />
+            <line x1="12" y1="12" x2="12" y2="7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
           </svg>
-          Eye Timer
+          <span>Eye Timer</span>
         </div>
         <div className="nav-buttons">
-          <button>
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ verticalAlign: 'middle', marginRight: '5px' }}>
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-              <polyline points="14 2 14 8 20 8"></polyline>
-              <line x1="16" y1="13" x2="8" y2="13"></line>
-              <line x1="16" y1="17" x2="8" y2="17"></line>
-              <polyline points="10 9 9 9 8 9"></polyline>
-            </svg>
-            Report
+          <button
+            className="mode-toggle-button"
+            onClick={() => { setTimerMode(timerMode === 'manual' ? 'automate' : 'manual'); localStorage.setItem("timermode", timerMode === 'manual' ? 'automate' : 'manual') } }
+          >
+            {timerMode === 'manual' ? 'Switch to Automate Mode' : 'Switch to Manual Mode'}
           </button>
           <button onClick={() => setShowSettingsModal(true)}>
             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ verticalAlign: 'middle', marginRight: '5px' }}>
@@ -178,7 +158,6 @@ export default function App() {
         <button
           className={`start-button ${timerRunning ? 'running' : ''}`}
           onClick={handleStartPause}
-          style={{ color: timerRunning ? (activeTab === 'work' ? '#498b8b' : '#ba4949') : (activeTab === 'work' ? '#ba4949' : '#498b8b') }}
         >
           {timerRunning ? 'PAUSE' : 'START'}
         </button>
@@ -189,22 +168,9 @@ export default function App() {
         </div>
       </div>
 
-      {/* Automate/Manual Toggle Button */}
-      <button
-        className="mode-toggle-button"
-        onClick={() => setTimerMode(timerMode === 'manual' ? 'automate' : 'manual')}
-      >
-        {timerMode === 'manual' ? 'Switch to Automate Mode' : 'Switch to Manual Mode'}
-      </button>
-
       {/* Session Counts Display */}
       <div className="session-counts">
-        <div>
-          Work Sessions: <span>{workCount}</span>
-        </div>
-        <div>
-          Break Sessions: <span>{breakCount}</span>
-        </div>
+        Work: {workCount} | {breakCount} :Break
       </div>
 
       {/* Settings Modal */}
@@ -219,15 +185,15 @@ export default function App() {
             </div>
 
             <div className="settings-group">
-              <h3>Time (minutes)</h3>
+              <h3>TIME (MINUTES)</h3>
               <div className="settings-item">
                 <label htmlFor="work-minutes">Work</label>
                 <input
                   type="number"
                   id="work-minutes"
                   value={workMinutes}
-                  onChange={(e) => setWorkMinutes(Math.max(1, parseInt(e.target.value) || 1))}
-                  min="1"
+                  onChange={(e) => { setWorkMinutes(Math.max(1, parseInt(e.target.value))); localStorage.setItem("workminutes", Math.max(1, parseInt(e.target.value))); }}
+                  min={0}
                 />
               </div>
               <div className="settings-item">
@@ -236,23 +202,8 @@ export default function App() {
                   type="number"
                   id="break-seconds"
                   value={breakSeconds}
-                  onChange={(e) => setBreakSeconds(Math.max(1, parseInt(e.target.value) || 1))}
-                  min="1"
-                />
-              </div>
-              {/* Long Break input removed */}
-            </div>
-
-            <div className="settings-group">
-              <h3>20-20-20 Rule Specifics</h3>
-              <div className="settings-item">
-                <label htmlFor="distance-feet">Distance (feet)</label>
-                <input
-                  type="number"
-                  id="distance-feet"
-                  value={distanceFeet}
-                  onChange={(e) => setDistanceFeet(Math.max(1, parseInt(e.target.value) || 1))}
-                  min="1"
+                  onChange={(e) => {setBreakSeconds(Math.max(1, parseInt(e.target.value))); localStorage.setItem("breakeseconds", Math.max(1, parseInt(e.target.value)));}}
+                  min={0}
                 />
               </div>
             </div>

@@ -20,7 +20,7 @@ button{
   flex-direction: column;
   align-items: center;
   padding: 20px;
-  transition: background-color 0.5s ease;
+  transition: background-color 0.3s ease;
   color: #fff;
 }
 
@@ -42,7 +42,6 @@ button{
   padding: 10px 0;
   border-bottom: 1px solid rgba(255, 255, 255, 0.2);
 }
-
 .app-logo {
   display: flex;
   align-items: center;
@@ -63,7 +62,7 @@ button{
   border-radius: 5px;
   cursor: pointer;
   font-weight: 600;
-  transition: background-color 0.3s ease;
+  transition: background-color 0.1s ease;
 }
 
 .nav-buttons button:hover {
@@ -75,7 +74,7 @@ button{
   border-radius: 15px;
   padding: 30px;
   text-align: center;
-  width: 100%;
+  width: 85%;
   max-width: 450px;
 }
 
@@ -97,7 +96,7 @@ button{
   cursor: pointer;
   font-size: 16px;
   font-weight: 600;
-  transition: background-color 0.3s ease;
+  transition: background-color 0.1s ease;
 }
 
 .timer-tab-button.active {
@@ -113,31 +112,20 @@ button{
 
 .start-button {
   background-color: #fff;
-  color: #ba4949; /* Default red for button text */
+  color: #3498db; /* Default red for button text */
   border: none;
   padding: 15px 50px;
   border-radius: 10px;
   font-size: 22px;
   font-weight: 700;
   cursor: pointer;
-  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
   position: relative; /* For the shadow effect */
   bottom: 0;
-}
-
-.start-button:hover {
-  transform: translateY(2px);
-  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
 }
 
 .start-button:active {
   transform: translateY(4px);
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
-}
-
-.start-button.running {
-  color: #498b8b; /* Change color when running, maybe green or teal */
 }
 
 .session-info {
@@ -146,42 +134,9 @@ button{
   font-weight: 600;
   opacity: 0.8;
 }
-
-.tasks-section {
-  width: 100%;
-  max-width: 450px;
-  margin-top: 40px;
-  color: rgba(255, 255, 255, 0.8);
+.session-counts{
+  margin-top: 1rem;
 }
-
-.tasks-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-  font-size: 20px;
-  font-weight: 700;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-  padding-bottom: 10px;
-}
-
-.add-task-button {
-  background: rgba(255, 255, 255, 0.1);
-  border: 2px dashed rgba(255, 255, 255, 0.3);
-  color: #fff;
-  padding: 20px;
-  width: 100%;
-  border-radius: 10px;
-  font-size: 18px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
-
-.add-task-button:hover {
-  background: rgba(255, 255, 255, 0.2);
-}
-
 /* Settings Modal */
 .settings-modal-overlay {
   position: fixed;

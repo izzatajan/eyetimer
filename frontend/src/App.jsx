@@ -15,7 +15,6 @@ export default function App() {
   const breakSoundRef = useRef(new Audio('/alarm.mp3')); // Reference to the break sound file
   const [showSettingsModal, setShowSettingsModal] = useState(false);
 
-
   // Handler for starting/pausing the timer
   const handleStartPause = () => {
     setTimerRunning((prev) => !prev);
@@ -67,8 +66,10 @@ export default function App() {
             setBreakCount(localStorage.getItem("breakcount"));
           }
           setActiveTab(activeTab === 'work' ? 'break' : 'work');
-          if (timerMode == 'automate') {
-            handleStartPause()
+          if (timerMode === 'automate') {
+            setTimeout(() => {
+              setTimerRunning(true);
+            }, 50);
           }
           return 0;
         }

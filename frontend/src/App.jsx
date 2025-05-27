@@ -1,14 +1,14 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react'; // Import useCallback
 
 export default function App() {
-  const [workMinutes, setWorkMinutes] = useState(localStorage.getItem("workminutes") === "NaN" ? 20 : localStorage.getItem("workminutes") < 0 ? 20 : localStorage.getItem("workminutes")); // Corresponds to intervalMinutes
-  const [breakSeconds, setBreakSeconds] = useState(localStorage.getItem("breakeseconds") === "NaN" ? 20 : localStorage.getItem("breakeseconds") < 0 ? 20 : localStorage.getItem("breakeseconds")); // Corresponds to breakDurationSeconds
+  const [workMinutes, setWorkMinutes] = useState(localStorage.getItem("workMinutes") == "NaN" ? 20 : localStorage.getItem("workMinutes") < 0 ? 20 : localStorage.getItem("workMinutes")); // Corresponds to intervalMinutes
+  const [breakSeconds, setBreakSeconds] = useState(localStorage.getItem("breakSeconds") == "NaN" ? 20 : localStorage.getItem("breakSeconds") < 0 ? 20 : localStorage.getItem("breakSeconds")); // Corresponds to breakDurationSeconds
   const [distanceFeet, setDistanceFeet] = useState(20); // For the 20-20-20 rule break message
   const [alertType, setAlertType] = useState('sound'); // State for alert type ('sound', 'visual')
   const [activeTab, setActiveTab] = useState('work');
   const [timerRunning, setTimerRunning] = useState(false);
   const [timeLeft, setTimeLeft] = useState(workMinutes * 60); // Time left for current active tab
-  const [timerMode, setTimerMode] = useState(localStorage.getItem("timermode")); // State for timer mode ('manual' or 'automate')
+  const [timerMode, setTimerMode] = useState(localStorage.getItem("timermode") || "manual"); // State for timer mode ('manual' or 'automate')
   const [workCount, setWorkCount] = useState(localStorage.getItem("workcount") || 0);
   const [breakCount, setBreakCount] = useState(localStorage.getItem("breakcount") || 0);
   const intervalRef = useRef(null);
@@ -22,6 +22,10 @@ export default function App() {
 
   // Effect hook to update timeLeft when activeTab or customization settings change
   useEffect(() => {
+    if (!timerMode) localStorage.setItem("timermode", "manual");
+    if(!workMinutes) localStorage.setItem("workMinutes", 20)
+    if(!breakSeconds) localStorage.setItem("breakSeconds", 20)
+
     let newTime = 0;
     if (activeTab === 'work') {
       newTime = workMinutes * 60;
@@ -195,7 +199,7 @@ export default function App() {
                   type="number"
                   id="work-minutes"
                   value={workMinutes}
-                  onChange={(e) => { setWorkMinutes(Math.max(1, parseInt(e.target.value))); localStorage.setItem("workminutes", Math.max(1, parseInt(e.target.value))); }}
+                  onChange={(e) => { setWorkMinutes(Math.max(1, parseInt(e.target.value))); localStorage.setItem("workMinutes", Math.max(1, parseInt(e.target.value))); }}
                   min={0}
                 />
               </div>
@@ -205,7 +209,7 @@ export default function App() {
                   type="number"
                   id="break-seconds"
                   value={breakSeconds}
-                  onChange={(e) => {setBreakSeconds(Math.max(1, parseInt(e.target.value))); localStorage.setItem("breakeseconds", Math.max(1, parseInt(e.target.value)));}}
+                  onChange={(e) => {setBreakSeconds(Math.max(1, parseInt(e.target.value))); localStorage.setItem("breakSeconds", Math.max(1, parseInt(e.target.value)));}}
                   min={0}
                 />
               </div>

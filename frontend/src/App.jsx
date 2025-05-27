@@ -87,6 +87,7 @@ export default function App() {
   // Handler for resetting the timer for the current tab
   const handleReset = () => {
     setTimerRunning(false);
+    setActiveTab("work")
     clearInterval(intervalRef.current);
     let newTime = 0;
     if (activeTab === 'work') {
@@ -164,7 +165,10 @@ export default function App() {
 
       {/* Session Counts Display */}
       <div className="session-counts">
-        Work: {workCount} | {breakCount} :Break
+        <div>
+          Work {workCount} | {breakCount} Break
+        </div>
+        <button onClick={() => handleReset()} className='reset-btn'>Reset all</button>
       </div>
 
       {/* Settings Modal */}

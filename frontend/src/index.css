@@ -24,12 +24,18 @@ button{
   color: #fff;
 }
 
-.bg-red {
+.bg-blue {
   background-color: #2e86c1; /* Pomodoro red */
 }
+.btn-blue{
+  color: #2e86c1;
+}
 
-.bg-teal {
+.bg-green {
   background-color: #28b262; /* Short Break teal */
+}
+.btn-green{
+  color: #28b262;
 }
 
 .app-header {
@@ -110,7 +116,6 @@ button{
 
 .start-button {
   background-color: #fff;
-  color: #3498db; /* Default red for button text */
   border: none;
   padding: 15px 50px;
   border-radius: 10px;

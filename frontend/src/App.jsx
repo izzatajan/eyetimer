@@ -9,8 +9,8 @@ export default function App() {
   const [timerRunning, setTimerRunning] = useState(false);
   const [timeLeft, setTimeLeft] = useState(workMinutes * 60); // Time left for current active tab
   const [timerMode, setTimerMode] = useState(localStorage.getItem("timermode")); // State for timer mode ('manual' or 'automate')
-  const [workCount, setWorkCount] = useState(0);
-  const [breakCount, setBreakCount] = useState(0);
+  const [workCount, setWorkCount] = useState(localStorage.getItem("workcount") || 0);
+  const [breakCount, setBreakCount] = useState(localStorage.getItem("breakcount") || 0);
   const intervalRef = useRef(null);
   const breakSoundRef = useRef(new Audio('/alarm.mp3')); // Reference to the break sound file
   const [showSettingsModal, setShowSettingsModal] = useState(false);
@@ -60,9 +60,11 @@ export default function App() {
           triggerAlert();
           // Only increment counts once here — BEFORE changing tab
           if (activeTab === 'work') {
-            setWorkCount((prev) => prev + 1);
+            localStorage.setItem("workcount", Number(workCount) + Number(1))
+            setWorkCount(localStorage.getItem("workcount"));
           } else {
-            setBreakCount((prev) => prev + 1);
+            localStorage.setItem("breakcount", Number(breakCount) + Number(1))
+            setBreakCount(localStorage.getItem("breakcount"));
           }
           setActiveTab(activeTab === 'work' ? 'break' : 'work');
           if (timerMode == 'automate') {
@@ -96,12 +98,14 @@ export default function App() {
       newTime = breakSeconds;
     }
     setTimeLeft(newTime);
+    localStorage.setItem("workcount", 0)
     setWorkCount(0); // Reset counts on manual reset
+    localStorage.setItem("breakcount", 0)
     setBreakCount(0); // Reset counts on manual reset
   };
   
   return (
-    <div className={`app-container ${activeTab === 'work' ? 'bg-red' : 'bg-teal'}`}>
+    <div className={`app-container ${activeTab === 'work' ? 'bg-blue' : 'bg-green'}`}>
 
       {/* Header */}
       <header className="app-header">
@@ -151,7 +155,7 @@ export default function App() {
         </div>
 
         <button
-          className={`start-button ${timerRunning ? 'running' : ''}`}
+          className={`start-button ${activeTab == "work" ? "btn-blue" : "btn-green"} ${timerRunning ? 'running' : ''}`}
           onClick={handleStartPause}
         >
           {timerRunning ? 'PAUSE' : 'START'}

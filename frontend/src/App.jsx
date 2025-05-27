@@ -12,8 +12,14 @@ export default function App() {
   const [workCount, setWorkCount] = useState(0);
   const [breakCount, setBreakCount] = useState(0);
   const intervalRef = useRef(null);
-  const breakSoundRef = useRef(new Audio('https://www.soundjay.com/buttons/beep-07a.mp3'));
+  const breakSoundRef = useRef(new Audio('/alarm.mp3')); // Reference to the break sound file
   const [showSettingsModal, setShowSettingsModal] = useState(false);
+
+
+  // Handler for starting/pausing the timer
+  const handleStartPause = () => {
+    setTimerRunning((prev) => !prev);
+  };
 
   // Effect hook to update timeLeft when activeTab or customization settings change
   useEffect(() => {
@@ -39,9 +45,9 @@ export default function App() {
       document.title = `${formatTime(timeLeft)} - ${activeTab === 'work' ? 'Work' : 'Break'} time`;
   }, [timeLeft, timerRunning, activeTab]);
 
-
   // Effect hook for the main timer countdown
   useEffect(() => {
+    
     if (!timerRunning) {
       clearInterval(intervalRef.current);
       return;
@@ -52,23 +58,16 @@ export default function App() {
         if (prevTime <= 1) {
           clearInterval(intervalRef.current);
           triggerAlert();
-
           // Only increment counts once here — BEFORE changing tab
           if (activeTab === 'work') {
             setWorkCount((prev) => prev + 1);
           } else {
             setBreakCount((prev) => prev + 1);
           }
-
-          if (timerMode === 'automate') {
-            setActiveTab(activeTab === 'work' ? 'break' : 'work');
-            // Let useEffect reset timeLeft
-            setTimerRunning(true);
-          } else {
-            setTimerRunning(false);
-            setActiveTab(activeTab === 'work' ? 'break' : 'work');
+          setActiveTab(activeTab === 'work' ? 'break' : 'work');
+          if (timerMode == 'automate') {
+            handleStartPause()
           }
-
           return 0;
         }
         return prevTime - 1;
@@ -83,11 +82,6 @@ export default function App() {
     const minutes = Math.floor(totalSeconds / 60);
     const seconds = totalSeconds % 60;
     return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-  };
-
-  // Handler for starting/pausing the timer
-  const handleStartPause = () => {
-    setTimerRunning((prev) => !prev);
   };
 
   // Handler for resetting the timer for the current tab
@@ -185,9 +179,9 @@ export default function App() {
             </div>
 
             <div className="settings-group">
-              <h3>TIME (MINUTES)</h3>
+              <h3>Time</h3>
               <div className="settings-item">
-                <label htmlFor="work-minutes">Work</label>
+                <label htmlFor="work-minutes">Work (minutes)</label>
                 <input
                   type="number"
                   id="work-minutes"

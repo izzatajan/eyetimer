@@ -16,6 +16,29 @@ export default function App() {
   const intervalRef = useRef(null);
   const relaxSoundRef = useRef(new Audio('/alarm.mp3')); // Reference to the relax sound file, changed from breakSoundRef
   const [showSettingsModal, setShowSettingsModal] = useState(false);
+  const settingsModalRef = useRef(null); // Ref for the settings modal to handle clicks outside
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      // Check if the modal is shown and the click is outside the modal content
+      if (settingsModalRef.current && !settingsModalRef.current.contains(event.target)) {
+        setShowSettingsModal(false);
+      }
+    };
+
+    // Add event listener when the modal is shown
+    if (showSettingsModal) {
+      document.addEventListener('mousedown', handleClickOutside);
+    } else {
+      // Remove event listener when the modal is hidden
+      document.removeEventListener('mousedown', handleClickOutside);
+    }
+
+    // Cleanup function to remove event listener when the component unmounts or modal visibility changes
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showSettingsModal]);
 
   // Handler for starting/pausing the timer
   const handleStartPause = () => {
@@ -186,7 +209,7 @@ export default function App() {
       {/* Settings Modal */}
       {showSettingsModal && (
         <div className="settings-modal-overlay">
-          <div className="settings-modal-content">
+          <div className="settings-modal-content" ref={settingsModalRef}>
             <div className="settings-modal-header">
               <h2>Timer Settings</h2>
               <button className="settings-close-button" onClick={() => setShowSettingsModal(false)}>
